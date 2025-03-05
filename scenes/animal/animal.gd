@@ -3,19 +3,36 @@ extends RigidBody2D
 class_name Animal
 
 @onready var arrow_sound_player: AudioStreamPlayer2D = $ArrowSoundPlayer
+@onready var launch_sound_player: AudioStreamPlayer2D = $LaunchSoundPlayer
+
+@onready var arrow_sprite: Sprite2D = $ArrowSprite
 
 #==========================================================#
 #========================= STATE ==========================#
 #==========================================================#
 
 enum STATE {READY, DRAG, RELEASE}
-var _state: STATE = STATE.READY: get = get_state, set = set_state
+var _state: STATE = STATE.READY
 
 #==========================================================#
-#======================= POSITION =========================#
+#======================== ANIMAL ==========================#
 #==========================================================#
 
-var _starting_position: Vector2 = Vector2.ZERO
+var _animal_starting_position: Vector2 = Vector2.ZERO
+
+#==========================================================#
+#========================= ARROW ==========================#
+#==========================================================#
+
+var ARROW_SCALE_IMPULSE_MAX: float = 1000.0
+
+var _arrow_starting_scale_x: float = 0.0
+
+#==========================================================#
+#================== IMPULSE MULTIPLIER ====================#
+#==========================================================#
+
+var IMPULSE_MULTIPLIER: float = 20.0
 
 #==========================================================#
 #========================== DRAG ==========================#
@@ -23,24 +40,16 @@ var _starting_position: Vector2 = Vector2.ZERO
 
 const DRAG_LIMIT: Vector2 = Vector2(-60, 60)
 
-var _drag_starting_position: Vector2 = Vector2.ZERO:
-	get:
-		return _drag_starting_position
-	set(gmp):
-		_drag_starting_position = gmp
-
-var _dragged_position: Vector2 = Vector2.ZERO:
-	get:
-		var aux_dragged_distance = get_global_mouse_position() - _drag_starting_position
-		var aux_clamped_dragged_distance = aux_dragged_distance.clampf(DRAG_LIMIT.x,DRAG_LIMIT.y)
-		return _starting_position + aux_clamped_dragged_distance
+var _drag_starting_position: Vector2 = Vector2.ZERO
 
 #==========================================================#
 #========================= READY ==========================#
 #==========================================================#
 
 func _ready() -> void:
-	_starting_position = position
+	_arrow_starting_scale_x = arrow_sprite.scale.x
+	arrow_sprite.hide()
+	_animal_starting_position = position
 
 #==========================================================#
 #==================== PHYSICS PROCESS =====================#
@@ -62,16 +71,23 @@ func state_process() ->void:
 #========================= STATE ==========================#
 #==========================================================#
 
-func get_state() -> STATE:
-	return _state
-
 func set_state(value) -> void:
 	_state = value
 	match _state:
-		STATE.RELEASE:
-			freeze = false
 		STATE.DRAG:
-			_drag_starting_position = get_global_mouse_position()
+			set_drag()
+		STATE.RELEASE:
+			set_release()
+
+func set_drag()-> void:
+	_drag_starting_position = get_global_mouse_position()
+	arrow_sprite.show()
+
+func set_release() ->void:
+	arrow_sprite.hide()
+	freeze = false
+	apply_central_impulse(get_impulse())
+	launch_sound_player.play()
 
 #==========================================================#
 #========================= READY ==========================#
@@ -79,7 +95,7 @@ func set_state(value) -> void:
 
 func on_click(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if is_ready(event):
-		_state = STATE.DRAG
+		set_state(STATE.DRAG)
 	
 func is_ready(event)->bool:
 	return _state == STATE.READY and event.is_action_pressed("click")
@@ -90,25 +106,62 @@ func is_ready(event)->bool:
 
 func dragging()-> void:
 	if has_stopped_dragging():
-		_state = STATE.RELEASE
+		set_state(STATE.RELEASE)
 		return
 	
 	drag()
 
 func drag()->void:
 	play_arrow_sound()
-	position = _dragged_position
+	drag_animal()
+	animate_arrow()
 
 func has_stopped_dragging()-> bool:
 	return _state == STATE.DRAG and Input.is_action_just_released("click")
 
 func was_dragged()-> bool:
-		if(position != _dragged_position):
-			return true
-		return false
+	if(position != get_animal_position()):
+		return true
+	return false
+	
+func get_dragged_position()-> Vector2:
+	var aux_dragged_distance = get_global_mouse_position() - _drag_starting_position
+	return aux_dragged_distance.clampf(DRAG_LIMIT.x,DRAG_LIMIT.y)
 
 #==========================================================#
-#=================== Play Arrow Sound =====================#
+#======================== IMPULSE =========================#
+#==========================================================#
+
+func get_impulse()-> Vector2:
+	return get_dragged_position() * -1 * IMPULSE_MULTIPLIER
+
+##==========================================================#
+##====================== DRAG ANIMAL =======================#
+##==========================================================#
+
+func drag_animal()-> void:
+	position = get_animal_position()
+
+func get_animal_position()-> Vector2:
+	return _animal_starting_position + get_dragged_position()
+
+#==========================================================#
+#==================== ARROW ANIMATE  ======================#
+#==========================================================#
+
+func animate_arrow()-> void:
+	arrow_sprite.scale.x = get_arrow_scale()
+	arrow_sprite.rotation = get_arrow_rotation()
+
+func get_arrow_scale()-> float:
+	var impulse_percentage = get_impulse().length() / ARROW_SCALE_IMPULSE_MAX
+	return (_arrow_starting_scale_x * impulse_percentage) + _arrow_starting_scale_x
+
+func get_arrow_rotation()-> float:
+	return (_animal_starting_position - position).angle()
+
+#==========================================================#
+#=================== PLAY ARROW SOUND =====================#
 #==========================================================#
 
 func play_arrow_sound() -> void:

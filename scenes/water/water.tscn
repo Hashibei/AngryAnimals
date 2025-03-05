@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://1rkg4sbb7dke"]
 
 [ext_resource type="Texture2D" uid="uid://c1felk8omn2y6" path="res://assets/scene/waterTop_high.png" id="1_ldlu5"]
-[ext_resource type="Script" path="res://scenes/water/water.gd" id="1_ooxmb"]
+[ext_resource type="Script" uid="uid://b2c5imphky4dg" path="res://scenes/water/water.gd" id="1_ooxmb"]
 [ext_resource type="AudioStream" uid="uid://csr68ltv7bbxp" path="res://assets/audio/splash.ogg" id="3_dgv8a"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_v41ri"]

@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bauta10xf6soy"]
 
 [ext_resource type="Texture2D" uid="uid://igcwx2vhwe3x" path="res://assets/scene/colored_castle.png" id="1_3wce8"]
-[ext_resource type="Script" path="res://scenes/level/level.gd" id="1_kc6ju"]
+[ext_resource type="Script" uid="uid://dw5x7tdglmn6a" path="res://scenes/level/level.gd" id="1_kc6ju"]
 [ext_resource type="PackedScene" uid="uid://1rkg4sbb7dke" path="res://scenes/water/water.tscn" id="2_yics0"]
 
 [node name="Level" type="Node2D"]
