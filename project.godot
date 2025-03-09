@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="AngryAnimals"
-run/main_scene="res://scenes/level/level.tscn"
+run/main_scene="uid://opoco8inoukc"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"
 
@@ -39,6 +39,7 @@ click={
 
 2d_physics/layer_1="animal"
 2d_physics/layer_2="water"
+2d_physics/layer_3="terrain"
 
 [rendering]
 

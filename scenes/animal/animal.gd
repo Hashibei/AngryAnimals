@@ -4,6 +4,7 @@ class_name Animal
 
 @onready var arrow_sound_player: AudioStreamPlayer2D = $ArrowSoundPlayer
 @onready var launch_sound_player: AudioStreamPlayer2D = $LaunchSoundPlayer
+@onready var kick_sound_player: AudioStreamPlayer2D = $KickSoundPlayer
 
 @onready var arrow_sprite: Sprite2D = $ArrowSprite
 
@@ -64,8 +65,6 @@ func state_process() ->void:
 			pass
 		STATE.DRAG:
 			dragging()
-		STATE.RELEASE:
-			pass
 
 #==========================================================#
 #========================= STATE ==========================#
@@ -88,6 +87,7 @@ func set_release() ->void:
 	freeze = false
 	apply_central_impulse(get_impulse())
 	launch_sound_player.play()
+	SignalManager.attempet_made.emit()
 
 #==========================================================#
 #========================= READY ==========================#
@@ -168,6 +168,31 @@ func play_arrow_sound() -> void:
 	if(was_dragged()):
 		if(arrow_sound_player.playing == false):
 			arrow_sound_player.play()
+
+#==========================================================#
+#==================== ANIMAL COLLIDED =====================#
+#==========================================================#
+
+func _on_animal_collided(_body: Node) -> void:
+	if kick_sound_player.playing == false:
+		kick_sound_player.play()
+
+#==========================================================#
+#================= SLEEPING STATE CHANGED =================#
+#==========================================================#
+
+func _on_animal_sleeping_state_changed() -> void:
+	if sleeping == true:
+		despawn_colling_cup()
+		call_deferred("despawn")
+
+#==========================================================#
+#================= DESPAWN COLLIDING CUP ==================#
+#==========================================================#
+
+func despawn_colling_cup() -> void:
+	var cup = get_colliding_bodies()[0]
+	cup.despawn()
 
 #==========================================================#
 #===================== SCREEN EXITED ======================#

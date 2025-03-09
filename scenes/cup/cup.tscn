@@ -1,0 +1,92 @@
+[gd_scene load_steps=8 format=3 uid="uid://baceqs3rtksn7"]
+
+[ext_resource type="Script" uid="uid://c54siagdlagpe" path="res://scenes/cup/cup.gd" id="1_by8ld"]
+[ext_resource type="Texture2D" uid="uid://c660toja7hbeo" path="res://assets/env/elementWood004.png" id="1_v8aan"]
+[ext_resource type="Texture2D" uid="uid://ccpvlej0dup0k" path="res://assets/env/elementWood015.png" id="2_yh1sb"]
+[ext_resource type="AudioStream" uid="uid://5d3jb6pmcecf" path="res://assets/audio/vanish.wav" id="3_yh1sb"]
+
+[sub_resource type="Animation" id="Animation_by8ld"]
+resource_name = "vanish"
+length = 0.9
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CupSprites:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0.5, 0.5), Vector2(1, 1), Vector2(0, 0)]
+}
+tracks/1/type = "audio"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VanishAudioPlayer")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"clips": [{
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource("3_yh1sb")
+}],
+"times": PackedFloat32Array(0)
+}
+tracks/1/use_blend = true
+
+[sub_resource type="Animation" id="Animation_c6ac2"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CupSprites:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.5, 0.5)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_oqoyy"]
+_data = {
+&"RESET": SubResource("Animation_c6ac2"),
+&"vanish": SubResource("Animation_by8ld")
+}
+
+[node name="Cup" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_by8ld")
+
+[node name="CupSprites" type="Node2D" parent="."]
+scale = Vector2(0.5, 0.5)
+
+[node name="LeftTriangleSprite" type="Sprite2D" parent="CupSprites"]
+position = Vector2(-72, -70)
+texture = ExtResource("1_v8aan")
+
+[node name="RightTriangleSprite" type="Sprite2D" parent="CupSprites"]
+position = Vector2(72, -70)
+texture = ExtResource("1_v8aan")
+flip_h = true
+
+[node name="BoxSprite" type="Sprite2D" parent="CupSprites"]
+texture = ExtResource("2_yh1sb")
+
+[node name="CupCollision" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-53, -52, -53, 17, 54, 17, 54, -53, 20, -18, -19, -18)
+
+[node name="VanishAudioPlayer" type="AudioStreamPlayer2D" parent="."]
+scale = Vector2(0.5, 0.5)
+
+[node name="VanishAnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_oqoyy")
+}
+
+[connection signal="animation_finished" from="VanishAnimationPlayer" to="." method="_on_vanish_animation_finished"]
