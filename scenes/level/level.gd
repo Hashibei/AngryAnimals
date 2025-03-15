@@ -8,9 +8,6 @@ func _ready() -> void:
 	spawn_animal()
 	SignalManager.animal_despawn.connect(respawn_animal)
 
-func _process(_delta: float) -> void:
-	pass
-
 func spawn_animal() -> void:
 	var animal: Animal = ANIMAL.instantiate()
 	animal.position = animal_spawn.position

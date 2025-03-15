@@ -1,15 +1,40 @@
-[gd_scene load_steps=5 format=3 uid="uid://bauta10xf6soy"]
+[gd_scene load_steps=6 format=3 uid="uid://bauta10xf6soy"]
 
 [ext_resource type="Texture2D" uid="uid://igcwx2vhwe3x" path="res://assets/scene/colored_castle.png" id="1_3wce8"]
-[ext_resource type="Script" uid="uid://dw5x7tdglmn6a" path="res://scenes/level/level.gd" id="1_kc6ju"]
 [ext_resource type="PackedScene" uid="uid://1rkg4sbb7dke" path="res://scenes/water/water.tscn" id="2_yics0"]
-[ext_resource type="PackedScene" uid="uid://baceqs3rtksn7" path="res://scenes/cup/cup.tscn" id="4_qkmgm"]
+[ext_resource type="PackedScene" uid="uid://ds4a3sqpxcx7e" path="res://scenes/scorer/scorer.tscn" id="3_i166f"]
+[ext_resource type="PackedScene" uid="uid://dmmbbb3tk80xm" path="res://scenes/game_ui/game_ui.tscn" id="4_qkmgm"]
+
+[sub_resource type="GDScript" id="GDScript_nbgty"]
+script/source = "extends Node2D
+
+const ANIMAL = preload(\"res://scenes/animal/animal.tscn\")
+const MAIN = preload(\"res://scenes/main/main.tscn\")
+
+@onready var animal_spawn: Marker2D = $AnimalSpawn
+
+func _ready() -> void:
+	spawn_animal()
+	SignalManager.animal_despawn.connect(respawn_animal)
+
+func _process(_delta: float) -> void:
+	if Input.is_key_pressed(KEY_ESCAPE):
+		get_tree().change_scene_to_packed(MAIN)
+
+func spawn_animal() -> void:
+	var animal: Animal = ANIMAL.instantiate()
+	animal.position = animal_spawn.position
+	add_child(animal)
+
+func respawn_animal() -> void:
+	spawn_animal()
+"
 
 [node name="Level" type="Node2D"]
-script = ExtResource("1_kc6ju")
+script = SubResource("GDScript_nbgty")
 
 [node name="CastleSprite" type="Sprite2D" parent="."]
-position = Vector2(580, 220)
+position = Vector2(580, 324)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("1_3wce8")
 metadata/_edit_lock_ = true
@@ -25,11 +50,8 @@ position = Vector2(576, 584)
 collision_layer = 0
 metadata/_edit_lock_ = true
 
-[node name="Cup1" parent="." instance=ExtResource("4_qkmgm")]
-position = Vector2(268, 232)
+[node name="Scorer" parent="." instance=ExtResource("3_i166f")]
 
-[node name="Cup2" parent="." instance=ExtResource("4_qkmgm")]
-position = Vector2(608, 257)
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Cup3" parent="." instance=ExtResource("4_qkmgm")]
-position = Vector2(872, 385)
+[node name="GameUI" parent="CanvasLayer" instance=ExtResource("4_qkmgm")]
